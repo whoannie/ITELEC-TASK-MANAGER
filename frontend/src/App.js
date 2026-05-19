@@ -81,7 +81,7 @@ function App() {
 
     if (!title || !minutes) return;
 
-    await fetch('http://127.0.0.1:8000/api/tasks/', {
+    await fetch(`${API_URL}/api/tasks/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
