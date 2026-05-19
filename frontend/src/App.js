@@ -10,7 +10,7 @@ function App() {
   const [minutes, setMinutes] = useState('');
 
   // FETCH TASKS
-  const fetchTasks = async () => {
+    const fetchTasks = async () => {
     const response = await fetch(`${API_URL}/api/tasks/`)
     const data = await response.json();
 
@@ -27,7 +27,7 @@ function App() {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [fetchTasks]); 
 
   // TIMER
   useEffect(() => {
