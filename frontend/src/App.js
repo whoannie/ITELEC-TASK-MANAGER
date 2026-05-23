@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
 
-  const API_URL = "http://iana21.pythonanywhere.com/api/tasks/";
+  const API_URL = "https://iana21.pythonanywhere.com/api/tasks/";
 
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
