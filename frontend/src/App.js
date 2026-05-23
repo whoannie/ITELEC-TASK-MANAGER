@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = "http://iana21.pythonanywhere.com/api/tasks/";
 
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
@@ -11,7 +11,7 @@ function App() {
 
   // FETCH TASKS
     const fetchTasks = async () => {
-    const response = await fetch(`${API_URL}/api/tasks/`)
+    const response = await fetch(API_URL)
     const data = await response.json();
 
     const updatedTasks = data.map(task => ({
