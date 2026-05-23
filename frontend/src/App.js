@@ -10,33 +10,36 @@ function App() {
   const [minutes, setMinutes] = useState('');
 
   // FETCH TASKS
-    const fetchTasks = async () => {
-    const response = await fetch(API_URL)
-    const data = await response.json();
-
-    const updatedTasks = data.map(task => ({
-      ...task,
-      timer: 0,
-      initialTime: 0,
-      running: false,
-      done: false
-    }));
-
-    setTasks(updatedTasks);
-  };
-
   useEffect(() => {
+
+    const fetchTasks = async () => {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      const updatedTasks = data.map(task => ({
+        ...task,
+        timer: 0,
+        initialTime: 0,
+        running: false,
+        done: false
+      }));
+
+      setTasks(updatedTasks);
+    };
+
     fetchTasks();
-  }, [fetchTasks]); 
+
+  }, []);
 
   // TIMER
   useEffect(() => {
+
     const interval = setInterval(() => {
 
       setTasks(prevTasks =>
         prevTasks.map(task => {
 
-          // ✅ TASK COMPLETE FIRST
+          // TASK COMPLETE
           if (task.running && task.timer === 1) {
             return {
               ...task,
@@ -46,7 +49,7 @@ function App() {
             };
           }
 
-          // ✅ COUNTDOWN
+          // COUNTDOWN
           if (task.running && task.timer > 1) {
             return {
               ...task,
@@ -61,19 +64,25 @@ function App() {
     }, 1000);
 
     return () => clearInterval(interval);
+
   }, []);
 
   // FORMAT TIME
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   // PROGRESS %
   const getProgress = (task) => {
+
     if (task.initialTime === 0) return 0;
-    return ((task.initialTime - task.timer) / task.initialTime) * 100;
+
+    return (
+      ((task.initialTime - task.timer) / task.initialTime) * 100
+    );
   };
 
   // ADD TASK
@@ -81,19 +90,24 @@ function App() {
 
     if (!title || !minutes) return;
 
-    await fetch(`${API_URL}/api/tasks/`, {
+    // SAVE TO DJANGO API
+    await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         title: title,
         is_completed: false
       }),
     });
 
-    const response = await fetch(`${API_URL}/api/tasks/`);
+    // FETCH UPDATED TASKS
+    const response = await fetch(API_URL);
     const data = await response.json();
 
     const newestTask = data[data.length - 1];
+
     const totalSeconds = parseInt(minutes) * 60;
 
     setTasks(prev => [
@@ -111,8 +125,9 @@ function App() {
     setMinutes('');
   };
 
-  // START
+  // START TASK
   const startTask = (taskId) => {
+
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === taskId && !task.done
@@ -122,8 +137,9 @@ function App() {
     );
   };
 
-  // PAUSE
+  // PAUSE TASK
   const pauseTask = (taskId) => {
+
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === taskId
@@ -133,20 +149,29 @@ function App() {
     );
   };
 
-  // DELETE
-  const deleteTask = (taskId) => {
+  // DELETE TASK
+  const deleteTask = async (taskId) => {
+
+    await fetch(`${API_URL}${taskId}/`, {
+      method: 'DELETE',
+    });
+
     setTasks(prevTasks =>
       prevTasks.filter(task => task.id !== taskId)
     );
   };
 
   return (
+
     <div className="container">
+
       <div className="card">
 
         <h1>✨ Magical Task Timer ✨</h1>
 
+        {/* INPUTS */}
         <div className="input-section">
+
           <input
             type="text"
             placeholder="Enter your magical task..."
@@ -162,9 +187,13 @@ function App() {
             className="minute-input"
           />
 
-          <button onClick={addTask}>Add</button>
+          <button onClick={addTask}>
+            Add
+          </button>
+
         </div>
 
+        {/* TASK LIST */}
         <div className="task-list">
 
           {tasks.map(task => (
@@ -176,16 +205,22 @@ function App() {
                 ${task.done ? 'done' : ''}
               `}
             >
-              {/* 🎉 CONFETTI GOES HERE */}
-              {task.done && (
-              <>
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className="confetti"></div>
-                                ))}
-                 </>
-                   )}
 
+              {/* CONFETTI */}
+              {task.done && (
+                <>
+                  {[...Array(9)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="confetti"
+                    ></div>
+                  ))}
+                </>
+              )}
+
+              {/* TASK HEADER */}
               <div className="task-header">
+
                 <h3>
                   {task.done ? '✅' : '🌸'} {task.title}
                 </h3>
@@ -195,28 +230,40 @@ function App() {
                     DONE
                   </span>
                 )}
+
               </div>
 
+              {/* TIMER */}
               <p className="timer">
+
                 {task.done
                   ? 'Task Completed 🎉'
                   : `⏰ ${formatTime(task.timer)}`
                 }
+
               </p>
 
-              {/* ✅ PROGRESS BAR */}
+              {/* PROGRESS BAR */}
               {!task.done && (
+
                 <div className="progress-bar">
+
                   <div
                     className="progress-fill"
-                    style={{ width: `${getProgress(task)}%` }}
+                    style={{
+                      width: `${getProgress(task)}%`
+                    }}
                   ></div>
+
                 </div>
+
               )}
 
+              {/* BUTTONS */}
               <div className="actions">
 
                 {!task.done && (
+
                   <button
                     className="start-btn"
                     onClick={() =>
@@ -225,8 +272,12 @@ function App() {
                         : startTask(task.id)
                     }
                   >
-                    {task.running ? '⏸ Pause' : '▶ Start'}
+                    {task.running
+                      ? '⏸ Pause'
+                      : '▶ Start'
+                    }
                   </button>
+
                 )}
 
                 <button
@@ -245,6 +296,7 @@ function App() {
         </div>
 
       </div>
+
     </div>
   );
 }
